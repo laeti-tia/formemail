@@ -55,10 +55,14 @@ require "class.CodeEmail.php";
  *	$subject : default subject
  *	$from : default from address
  ******************************************************************************/
-$log_file = "/var/log/apache/php/formemail.log";
+$log_file = "/var/log/apache2/formemail.log";
 $subject = "Message from formemail";
 $to = "gro#aepoissac|llun";
 $from = "gro#aepoissac|php#liamemrof";
+//$from = "";
+$name = "";
+$firstname = "";
+$replytoname = "";
 
 /******************************************************************************
  * PrintErrorPage($error_msg)
@@ -68,16 +72,46 @@ $from = "gro#aepoissac|php#liamemrof";
  ******************************************************************************/
 function PrintErrorPage($error_msg) { 
   ?> 
- <HTML> 
-    <HEAD><TITLE>Error</TITLE></HEAD> 
-    <BODY> 
-    <DIV ALIGN=center> 
-    <TABLE CELLPADDING=8>
-    <TR> 
-    <TD BGCOLOR=#8A8A8A><FONT SIZE=+2>Error when sending form</FONT></TD> 
-    </TR>
+ <html> 
+    <head><title>Error</title></head> 
+    <body> 
+    <div align="center"> 
+    <table cellpadding="8">
+    <tr> 
+    <td bgcolor="#8A8A8A"><font size="+2">Error when sending form</font></td> 
+    </tr>
     <TR> 
     <TD BGCOLOR=#C0C0C0><B>Use the BACK button to correct the errors.</B>
+    <BR><BR>
+    <font size="-1">formemail.php</font>
+    <?PHP print $error_msg; ?> 
+    </TD> 
+	</TR>
+	</TABLE>            
+	</DIV>           
+	</BODY>
+	</HTML> 
+	<?PHP 
+	} 
+
+/******************************************************************************
+ * PrintRobotPage($error_msg)
+ * 		Description : prints a robot error page
+ *		Agruments   : $error_msg : error message to report
+ *		Returns     : -
+ ******************************************************************************/
+function PrintRobotPage($error_msg) { 
+  ?> 
+ <html> 
+    <head><title>Thanks!</title></head> 
+    <body> 
+    <div align="center"> 
+    <table cellpadding="8">
+    <tr> 
+    <td bgcolor="#8A8A8A"><font size="+2">You sent the form</font></td> 
+    </tr>
+    <TR> 
+    <TD BGCOLOR=#C0C0C0><B>Thanks, however...</B>
     <BR><BR>
     <?PHP print $error_msg; ?> 
     </TD> 
@@ -119,7 +153,7 @@ function PrintSuccessPage($success_msg) {
  *	Returns:the absolute path to the file if it exists, an empty string otherwise
  ******************************************************************************/
 function CheckFile($file, $root, $referer) {
-  if($file[0] == "/") {
+  if ($file[0] == "/") {
     //--we have an absolute path
     $full_path_file = $root.$file;
   } else {
@@ -130,122 +164,151 @@ function CheckFile($file, $root, $referer) {
   if (file_exists($full_path_file)) {
     return $full_path_file;
   } else {
-    error_log ("File doesn't exist : ".$full_path_file);
+    error_log ("File doesn't exist: ".$full_path_file, 3, $log_file);
     return "";
   }
 }
 
 //--Get main posted vars
-//--to field
-if (!empty($HTTP_POST_VARS["to"])) {
-  $addr = new CodeEmail($HTTP_POST_VARS["to"]);
-  $to = $addr->decodedAddress;
-} else {
-  $addr = new CodeEmail($to);
-  $to = $addr->decodedAddress;
+//--robot prevention
+if (!empty($_POST["CassePammeur"])) {
+  $logMsg = date("y/m/d H:i:s")." Abuse attempt from <".$_SERVER["HTTP_REFERER"].">.\n";
+  error_log($logMsg, 3, $log_file);
+  PrintRobotPage("Nice try, cool but improper use!");
+  exit;
 }
 
-//--subject field
-if (!empty($HTTP_POST_VARS["subject"])) {
-  $subject = stripslashes($HTTP_POST_VARS["subject"]);
+//--Input sanitizing
+foreach ($_POST as $field_name => $field_value) {
+  // check the posted field for strange chars
+  switch ($field_name) {
+    case "from": 
+    case "to": 
+    case "replyto": 
+      $$field_name = $field_value;
+      break;
+    case "subject": 
+    case "name":
+    case "firstname":
+    case "replytoname":
+      $$field_name = stripslashes($field_value);
+      break;
+  }
 }
 
-//--from, name and firstname fields
-if (!empty($HTTP_POST_VARS["from"])) {
-  $addr = new CodeEmail($HTTP_POST_VARS["from"]);
-  $from = $addr->decodedAddress;
-  $name = "";
-  if (!empty($HTTP_POST_VARS["name"])) {
-    $name .= $HTTP_POST_VARS["name"]." ";
-  }
-  if (!empty($HTTP_POST_VARS["firstname"])) {
-    $name .= $HTTP_POST_VARS["firstname"];
-  }
-  //--replyto field
-  if (!empty($HTTP_POST_VARS["replyto"])) {
-    $replyto = $from;
-    $replytoname = $name;
-  }
-} else {
-  $addr = new CodeEmail($from);
-  $from = $addr->decodedAddress;
+//--Constructing the pseudo doc_root
+$doc_root = "/srv/membres/".$_SERVER["REDIRECT_MEMBRE"]."/".$_SERVER['SERVER_NAME'];
+
+//--Decode email addresses
+$addr = new CodeEmail($to);
+$to = $addr->decodedAddress;
+$addr = new CodeEmail($from);
+$from = $addr->decodedAddress;
+
+//--Compose name from name and firstname fields
+$name = $name.$firstname;
+
+//--check for number of email to post to
+if (substr_count($to, "@") > 5) {
+  // Houston, we've got a problem...
+  $logMsg = date("y/m/d H:i:s")." Too many email adresses given from <".$_SERVER["HTTP_REFERER"].">.\n";
+  error_log($logMsg, 3, $log_file);
+  PrintRobotPage("This form only accept 5 different email adresses to send to!");
+  exit;
 }
 
 //--create email object
-$mail = new Email($to, $subject, $from, $name, $replyto, $replytoname);
+if (!$mail = new Email($to, $subject, $from, $name, $replyto, $replytoname)) {
+  // Houston, we've got a problem...
+  $logMsg = date("y/m/d H:i:s")." Bad email address given from <".$_SERVER["HTTP_REFERER"].">.\n";
+  error_log($logMsg, 3, $log_file);
+  PrintRobotPage("One of the email address ($to, $from, $replyto) you sent us wasn't good!  Please go back to correct it.");
+  exit;
+}
 
 //--build email body and attachements
 $ok = false;
-if (!empty($HTTP_POST_VARS["template"])) {
-  if ($file = CheckFile($HTTP_POST_VARS["template"], $DOCUMENT_ROOT, $HTTP_SERVER_VARS["HTTP_REFERER"])) {
+if (!empty($_POST["template"])) {
+  if ($file = CheckFile($_POST["template"], $doc_root, $_SERVER["HTTP_REFERER"])) {
     //--plain text template file
     $ok = $mail->loadTemplate($file,
-			      $HTTP_POST_VARS,
+			      $_POST,
 			      "TEXT", true);
   }
 }
-if(!empty($HTTP_POST_VARS["TABtemplate"])) {
-  if ($file = CheckFile($HTTP_POST_VARS["TABtemplate"], $DOCUMENT_ROOT, $HTTP_SERVER_VARS["HTTP_REFERER"])) {
+if(!empty($_POST["TABtemplate"])) {
+  if ($file = CheckFile($_POST["TABtemplate"], $doc_root, $_SERVER["HTTP_REFERER"])) {
     //--TAB delimited template file
     $ok = $mail->loadTemplate($file,
-			      $HTTP_POST_VARS,
+			      $_POST,
 			      "TAB", true);
   }
 }
-if (!empty($HTTP_POST_VARS["HTMLtemplate"])) {
-  if ($file = CheckFile($HTTP_POST_VARS["HTMLtemplate"], $DOCUMENT_ROOT, $HTTP_SERVER_VARS["HTTP_REFERER"])) {
+if (!empty($_POST["HTMLtemplate"])) {
+  if ($file = CheckFile($_POST["HTMLtemplate"], $doc_root, $_SERVER["HTTP_REFERER"])) {
     //--HTML template file
     $ok = $mail->loadTemplate($file,
-			      $HTTP_POST_VARS,
+			      $_POST,
 			      "HTML", true);
   }
 }
 if (!$ok) {
   //--without template file
   $message = "";
-  while (list($key, $val) = each($HTTP_POST_VARS)) { 
+  reset($_POST);
+  while (list($key, $val) = each($_POST)) { 
     if (is_array($val)) {
       //--Multiple select input field
       $message .= $key.": ";
       foreach ($val as $sub_val) {
-	$message .= stripslashes($sub_val).",";
+	$message .= stripslashes($sub_val).", ";
       }
       $message = substr($message, 0, strlen($message)-1)."\n\n"; 
     } else {
       $message .= $key.": ".stripslashes($val)."\n\n"; 
     }
+    //$logMsg = date("y/m/d H:i:s")." Variables posted: '".$key."' '".$val."'\n";
+    //error_log($logMsg, 3, $log_file);
   }
   $ok = $mail->setText($message);
+  if (!$ok) {
+    //--Message is empty
+    $ok = $mail->setText("\n\nMessage body is empty.\n\n");
+    $logMsg = date("y/m/d H:i:s")." Empty message is being built: '".$message."'\n";
+    error_log($logMsg, 3, $log_file);
+  }
 }
 
 //--Actually send email
 if ($ok) {
   $ok = $mail->send();
-  $referer = $HTTP_SERVER_VARS["HTTP_REFERER"];
+  $referer = $_SERVER["HTTP_REFERER"];
   if (!empty($log_file)
       && file_exists($log_file)) {
     $logMsg = date("y/m/d H:i:s")." Message sent from <".$referer."> to <".$to."> with subject : '".$subject."'\n";
-    error_log($logMsg, 3, $log_file);
+    $status = error_log($logMsg, 3, $log_file);
   }
 }
 
 //--Print some debugging information
 $message = "";
-if (!empty($HTTP_POST_VARS["DEBUG"])) {
-  reset ($HTTP_POST_VARS);
+if (!empty($_POST["DEBUG"])) {
+  reset ($_POST);
   $message .= "<P>Debugging mode turned on by user request.<P>Here are the variables received&nbsp;<P>&nbsp;\n";
-  while (list($key, $val) = each($HTTP_POST_VARS)) {
+  $message .= "<p>error_log status = ".$status."<p>&nbsp;\n";
+  $message .= "<p>Log message : ".$logMsg."<p>&nbsp;\n";
+  while (list($key, $val) = each($_POST)) {
     if (is_array($val)) {
       //--Multiple select input field
       $message .= "<U>".$key."</U>: ";
       foreach ($val as $sub_val) {
-	$message .= $sub_val.",";
+	$message .= $sub_val.", ";
       }
       $message = substr($message, 0, strlen($message)-1)."<BR>\n";
     } else {
       $message .= "<U>".$key."</U>: ".$val; 
       if (preg_match("/.*template$/", $key)) {
-	if (CheckFile($val, $DOCUMENT_ROOT, $HTTP_SERVER_VARS["HTTP_REFERER"])) {
+	if (CheckFile($val, "/srv/membres/".$_SERVER["REDIRECT_MEMBRE"]."/".$_SERVER['SERVER_NAME'], $_SERVER["HTTP_REFERER"])) {
 	  $message .= " - file exists";
 	} else {
 	  $message .= " - <B>file doesn't exist</B>";
@@ -255,18 +318,22 @@ if (!empty($HTTP_POST_VARS["DEBUG"])) {
     }
   }
   $message .= "<P>And some more debugging output&nbsp;:\n";
-  $message .= "CONTENT_TYPE: ".$HTTP_SERVER_VARS["CONTENT_TYPE"]."<BR>\n";
-  $message .= "REQUEST_METHOD: ".$HTTP_SERVER_VARS["REQUEST_METHOD"]."<BR>\n";
-  $message .= "DOCUMENT_ROOT: ".$DOCUMENT_ROOT."<BR>\n";
-  $message .= "HTTP_REFERER: ".$HTTP_SERVER_VARS["HTTP_REFERER"]."<BR>\n";
+  $message .= "CONTENT_TYPE: ".$_SERVER["CONTENT_TYPE"]."<BR>\n";
+  $message .= "REQUEST_METHOD: ".$_SERVER["REQUEST_METHOD"]."<BR>\n";
+  $message .= "REMOTE_ADDR: ".$_SERVER["REMOTE_ADDR"]."<BR>\n";
+  $message .= "HTTP_X_FORWARDED_FOR: ".$_SERVER["HTTP_X_FORWARDED_FOR"]."<BR>\n";
+  $message .= "HTTP_REFERER: ".$_SERVER["HTTP_REFERER"]."<BR>\n";
+  $message .= "pseudo DOCUMENT_ROOT: ".$doc_root."<BR>\n";
+  $message .= "REDIRECT_MEMBRE: ".$_SERVER["REDIRECT_MEMBRE"]."<BR>\n";
+  $message .= "SCRIPT_FILENAME: ".$_SERVER["SCRIPT_FILENAME"]."<BR>\n";
   $message .= "Decoded ".'$'."to: ".$to."<BR>\n";
   $message .= "Decoded ".'$'."from: ".$from."<BR>\n";
 }
 
 if ($ok) {
-  $redirect = $HTTP_POST_VARS["redirect"];
-  $referer = $HTTP_SERVER_VARS["HTTP_REFERER"];
-  if (empty($redirect) || !empty($HTTP_POST_VARS["DEBUG"])) 
+  $redirect = $_POST["redirect"];
+  $referer = $_SERVER["HTTP_REFERER"];
+  if (empty($redirect) || !empty($_POST["DEBUG"])) 
     PrintSuccessPage($message);
   else {
     if($redirect[0] == "/") {
@@ -285,12 +352,12 @@ if ($ok) {
   }
 } else {
   //--Send error page 
-  PrintErrorPage($message);
+  PrintErrorPage("Message wasn't send because of form error.");
 }
 /*        
- 		$required = $HTTP_POST_VARS["required"];
-		$required_array = $HTTP_POST_VARS["required_array"];
-		$redirect = $HTTP_POST_VARS["redirect"];
+ 		$required = $_POST["required"];
+		$required_array = $_POST["required_array"];
+		$redirect = $_POST["redirect"];
   
 		// load required variables into $required_array 
         $required = ereg_replace(" ", "", $required); 

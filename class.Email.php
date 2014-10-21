@@ -64,7 +64,7 @@
 class Email 
 {
   //---Static
-  var $version		= "v1.2.2 by <antoine(at)delvaux(dot)net>";	// version string
+  var $version		= "v1.3.2 by Antoine Delvaux, Cassiopea";	// version string
 
   //---Properties
   var $mailTo           = "";           // array of To addresses 
@@ -100,11 +100,22 @@ class Email
    * Returns:		true if set 
    ***************************************************************************/ 
   function Email($mailToAddress, $mailSubject, $mailFrom = "<>", $mailFromName = "", $mailReplyTo = "", $mailReplyToName = "") {
-
-    $this->setTo($mailToAddress);
-    $this->setSubject($mailSubject);
-    $this->setFrom($mailFrom, $mailFromName);
-    $this->setReplyTo($mailReplyTo, $mailReplyToName);
+    if(!$this->setTo($mailToAddress)) {
+      return;
+    }
+    if(!$this->setSubject($mailSubject)) {
+      return;
+    }
+    if($mailFrom) {
+      if(!$this->setFrom($mailFrom, $mailFromName)) {
+        return;
+      }
+    }
+    if($mailReplyTo) {
+      if(!$this->setReplyTo($mailReplyTo, $mailReplyToName)) {
+        return;
+      }
+    }
   }
   /***************************************************************************
    * setTo($inAddress)
@@ -221,7 +232,7 @@ class Email
    ***************************************************************************/
   function setSubject($inSubject){
     if(strlen(trim($inSubject)) > 0){
-      $this->mailSubject = ereg_replace("\n","",$inSubject);
+      $this->mailSubject = ereg_replace("[\n\r\t\f]","",$inSubject);
       return true;
     }
     return false;
@@ -300,7 +311,7 @@ class Email
    * Returns:		true if valid
    ***************************************************************************/
   function checkEmail($inAddress){
-    return (ereg( "^[^@ ]+@([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]{2}|net|com|gov|mil|org|edu|int|info|biz|name)\$",$inAddress));
+    return (ereg( "^[^@ ]+@([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+)\$",$inAddress));
   }
   /***************************************************************************
    * buildVal($val, $inFormat, $doStripSlashes)

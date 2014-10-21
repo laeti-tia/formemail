@@ -1,6 +1,15 @@
 Change history of the formemail package
 ---------------------------------------
 
+21/10/14        1.3.3
+	Antoine Delvaux <antoine(at)delvaux(dot)net>
+
+        * Subject, From and Reply-To headers are now Quoted Printable encoded
+        * Augmented debugging output
+--------
+Between 2002 and 2014
+        * some changes
+--------
 06/12/02	1.2.2
 	Antoine Delvaux <antoine(at)delvaux(dot)net>
 
@@ -59,7 +68,7 @@ Change history of the formemail package
 
 --------
 99/10/21	1.0
-	Ron Chambers
+	Ron Chambers http://ronchambers.com/
 
 	* Email.php
 

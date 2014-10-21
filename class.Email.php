@@ -27,7 +27,7 @@
  *
  * See file LICENSE for full license text.
  *
- * Copyright © 2000-2002 Antoine Delvaux
+ * Copyright Â© 2000-2014 Antoine Delvaux
  ******************************************************************************/
 /*******************************************************************************
  * Class:	Email
@@ -64,7 +64,7 @@
 class Email 
 {
   //---Static
-  var $version		= "v1.3.2 by Antoine Delvaux, Cassiopea";	// version string
+  var $version		= "v1.3.3 by Antoine Delvaux, Cassiopea";	// version string
 
   //---Properties
   var $mailTo           = "";           // array of To addresses 
@@ -190,7 +190,7 @@ class Email
   function setFrom($inAddress, $inName=""){
     if($this->checkEmail($inAddress)){
       if($inName != "") {
-	$this->mailFrom = '"'.$inName.'"';
+	$this->mailFrom = '"'.$this->qpEncode($inName).'" ';
       } else {
 	$this->mailFrom = "";
       }
@@ -212,7 +212,7 @@ class Email
   function setReplyTo($inAddress, $inName=""){
     if($this->checkEmail($inAddress)){
       if($inName != "") {
-	$this->mailReplyTo = '"'.$inName.'"';
+	$this->mailReplyTo = '"'.$this->qpEncode($inName).'" ';
       } else {
 	$this->mailReplyTo = "";
       }
@@ -233,9 +233,26 @@ class Email
   function setSubject($inSubject){
     if(strlen(trim($inSubject)) > 0){
       $this->mailSubject = ereg_replace("[\n\r\t\f]","",$inSubject);
+      $this->mailSubject = $this->qpEncode($this->mailSubject);
       return true;
     }
     return false;
+  }
+  /***************************************************************************
+   * qpEncode($inText)
+   * 
+   * Description:	Encode an 8 bit string into Quoted Printable string
+   * Type:		public
+   * Arguments:		$inText as string
+   * Returns:		the encoded string
+   ***************************************************************************/
+  function qpEncode($inText){
+    // TODO: allow for different encoding or guess the encoding from input
+    $outText = '=?UTF-8?Q?';
+    $outText .= ereg_replace("=[\r\n]+", "?=\r\n =?UTF-8?Q?",
+      quoted_printable_encode(str_replace(' ', '_', $inText)));
+    $outText .= '?=';
+    return $outText;
   }
   /**************************************************************************
    * setText($inText)
@@ -414,7 +431,7 @@ class Email
     //--seed random number generator
     srand(time()+$offset);
     //--return md5 32 bits plus 4 dashes to make 38 chars
-    return ("----=Next".(md5(rand())));
+    return ("----=_Next".(md5(rand())));
   }
   /***************************************************************************
    * getContentType($inFileName)

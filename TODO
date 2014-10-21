@@ -29,7 +29,6 @@ TO DO List :
 - Free form name for the To, Cc and Bcc headers
 - User defined headers
 - X-Priority: header
-- Quoted printable encoding of headers
 - Different charset ?
 - Embeded images
 

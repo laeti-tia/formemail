@@ -42,7 +42,7 @@
  *
  * See file LICENSE for full license text.
  *
- * Copyright © 2000-2002 Antoine Delvaux
+ * Copyright Â© 2000-2014 Antoine Delvaux
  ******************************************************************************/
 // Load needed classes
 require "class.Email.php";
@@ -59,7 +59,6 @@ $log_file = "/var/log/apache2/formemail.log";
 $subject = "Message from formemail";
 $to = "gro#aepoissac|llun";
 $from = "gro#aepoissac|php#liamemrof";
-//$from = "";
 $name = "";
 $firstname = "";
 $replytoname = "";
@@ -71,7 +70,7 @@ $replytoname = "";
  *		Returns     : -
  ******************************************************************************/
 function PrintErrorPage($error_msg) { 
-  ?> 
+?> 
  <html> 
     <head><title>Error</title></head> 
     <body> 
@@ -80,19 +79,19 @@ function PrintErrorPage($error_msg) {
     <tr> 
     <td bgcolor="#8A8A8A"><font size="+2">Error when sending form</font></td> 
     </tr>
-    <TR> 
+    <tr> 
     <TD BGCOLOR=#C0C0C0><B>Use the BACK button to correct the errors.</B>
-    <BR><BR>
+    <br /><br />
     <font size="-1">formemail.php</font>
-    <?PHP print $error_msg; ?> 
-    </TD> 
-	</TR>
-	</TABLE>            
-	</DIV>           
-	</BODY>
-	</HTML> 
-	<?PHP 
-	} 
+    <?= $error_msg; ?> 
+    </td> 
+    </tr>
+    </table>            
+    </div>           
+    </body>
+    </html> 
+<?PHP 
+} 
 
 /******************************************************************************
  * PrintRobotPage($error_msg)
@@ -101,7 +100,7 @@ function PrintErrorPage($error_msg) {
  *		Returns     : -
  ******************************************************************************/
 function PrintRobotPage($error_msg) { 
-  ?> 
+?> 
  <html> 
     <head><title>Thanks!</title></head> 
     <body> 
@@ -110,18 +109,18 @@ function PrintRobotPage($error_msg) {
     <tr> 
     <td bgcolor="#8A8A8A"><font size="+2">You sent the form</font></td> 
     </tr>
-    <TR> 
+    <tr> 
     <TD BGCOLOR=#C0C0C0><B>Thanks, however...</B>
-    <BR><BR>
-    <?PHP print $error_msg; ?> 
-    </TD> 
-	</TR>
-	</TABLE>            
-	</DIV>           
-	</BODY>
-	</HTML> 
-	<?PHP 
-	} 
+    <br /><br />
+    <?= $error_msg; ?> 
+    </td> 
+    </tr>
+    </table>            
+    </div>           
+    </body>
+    </html> 
+<?PHP 
+} 
 
 /******************************************************************************
  * PrintSuccessPage($success_msg)
@@ -137,12 +136,12 @@ function PrintSuccessPage($success_msg) {
     <DIV ALIGN=center> 
     <P STYLE="SIZE=+1"><B>Thanks. Your form has been sent.</B>
     <P>&nbsp;
-    <?PHP print $success_msg; ?> 
-    </DIV>           
-	</BODY>
-	</HTML> 
-	<?PHP    
-	}
+    <?= $success_msg; ?> 
+    </div>           
+    </body>
+    </html> 
+<?PHP 
+}
 
 /******************************************************************************
  * CheckFile($file)
@@ -294,40 +293,42 @@ if ($ok) {
 $message = "";
 if (!empty($_POST["DEBUG"])) {
   reset ($_POST);
-  $message .= "<P>Debugging mode turned on by user request.<P>Here are the variables received&nbsp;<P>&nbsp;\n";
-  $message .= "<p>error_log status = ".$status."<p>&nbsp;\n";
-  $message .= "<p>Log message : ".$logMsg."<p>&nbsp;\n";
+  $message .= "<div align=left><p>Debugging mode turned on by user request.</p><p>Here are the variables received.</p><p>&nbsp;<br />\n";
   while (list($key, $val) = each($_POST)) {
     if (is_array($val)) {
       //--Multiple select input field
-      $message .= "<U>".$key."</U>: ";
+      $message .= "<u>".$key."</u>: ";
       foreach ($val as $sub_val) {
 	$message .= $sub_val.", ";
       }
-      $message = substr($message, 0, strlen($message)-1)."<BR>\n";
+      $message = substr($message, 0, strlen($message)-1)."<br />\n";
     } else {
-      $message .= "<U>".$key."</U>: ".$val; 
+      $message .= "<u>".$key."</u>: ".$val; 
       if (preg_match("/.*template$/", $key)) {
 	if (CheckFile($val, "/srv/membres/".$_SERVER["REDIRECT_MEMBRE"]."/".$_SERVER['SERVER_NAME'], $_SERVER["HTTP_REFERER"])) {
 	  $message .= " - file exists";
 	} else {
-	  $message .= " - <B>file doesn't exist</B>";
+	  $message .= " - <b>file doesn't exist</b>";
 	}
       }
-      $message .= "<BR>\n";
+      $message .= "<br />\n";
     }
   }
-  $message .= "<P>And some more debugging output&nbsp;:\n";
-  $message .= "CONTENT_TYPE: ".$_SERVER["CONTENT_TYPE"]."<BR>\n";
-  $message .= "REQUEST_METHOD: ".$_SERVER["REQUEST_METHOD"]."<BR>\n";
-  $message .= "REMOTE_ADDR: ".$_SERVER["REMOTE_ADDR"]."<BR>\n";
-  $message .= "HTTP_X_FORWARDED_FOR: ".$_SERVER["HTTP_X_FORWARDED_FOR"]."<BR>\n";
-  $message .= "HTTP_REFERER: ".$_SERVER["HTTP_REFERER"]."<BR>\n";
-  $message .= "pseudo DOCUMENT_ROOT: ".$doc_root."<BR>\n";
-  $message .= "REDIRECT_MEMBRE: ".$_SERVER["REDIRECT_MEMBRE"]."<BR>\n";
-  $message .= "SCRIPT_FILENAME: ".$_SERVER["SCRIPT_FILENAME"]."<BR>\n";
-  $message .= "Decoded ".'$'."to: ".$to."<BR>\n";
-  $message .= "Decoded ".'$'."from: ".$from."<BR>\n";
+  $message .= "</p><p>And some more debugging output&nbsp;:\n";
+  $message .= "CONTENT_TYPE: ".$_SERVER["CONTENT_TYPE"]."<br />\n";
+  $message .= "REQUEST_METHOD: ".$_SERVER["REQUEST_METHOD"]."<br />\n";
+  $message .= "REMOTE_ADDR: ".$_SERVER["REMOTE_ADDR"]."<br />\n";
+  $message .= "HTTP_X_FORWARDED_FOR: ".$_SERVER["HTTP_X_FORWARDED_FOR"]."<br />\n";
+  $message .= "HTTP_REFERER: ".$_SERVER["HTTP_REFERER"]."<br />\n";
+  $message .= "pseudo DOCUMENT_ROOT: ".$doc_root."<br />\n";
+  $message .= "REDIRECT_MEMBRE: ".$_SERVER["REDIRECT_MEMBRE"]."<br />\n";
+  $message .= "SCRIPT_FILENAME: ".$_SERVER["SCRIPT_FILENAME"]."<br />\n";
+  $message .= "Decoded ".'$'."to: ".$to."<br />\n";
+  $message .= "Decoded ".'$'."from: ".$from."<br />\n";
+  $message .= "Encoded mailSubject:<br />\n<pre>\n".$mail->mailSubject."\n</pre><br />\n";
+  $message .= "Encoded mailHeader:<br />\n<pre>\n".$mail->mailHeader."\n</pre><br />\n";
+  $message .= "</p><p>Finally, the log message is:<br />\n<pre>\n".$logMsg."\n</pre>\n";
+  $message .= "</div>\n";
 }
 
 if ($ok) {

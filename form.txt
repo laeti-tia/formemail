@@ -1,0 +1,30 @@
+Filled in form from formemail !
+
+Hidden 1 : ~!h1~
+
+----
+Text
+----
+txt1 : ~!txt1~
+txt2 : ~!txt2~
+txt3 : ~!txt3~
+txt4 : ~!txt4~
+txt5 : ~!txt5~
+
+-------
+Choices
+-------
+ckb1 : ~!ckb1~
+ckb2 : ~!ckb2a~ ~!ckb2b~ ~!ckb2c~ ~!ckb2d~ ~!ckb2e~
+
+radio1 : ~!radio1~
+
+sel1 : ~!sel1~
+sel2 : ~!sel2~
+
+sel3 and sel4 : ~!sel3~ ~!sel4~
+
+---------
+The END !
+---------
+

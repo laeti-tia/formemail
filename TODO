@@ -1,0 +1,35 @@
+TO DO List :
+------------
++---------------+
+| formemail.php |
++---------------+
+
+* Issues & Bug :
+
+* Improvements :
+
+- required fields
+- HTML template files :
+	- error page
+	- success page
+- ability to send files from FORM
+- form defined string for empty variables ?
+- custom headers ?
+
+
++-----------+
+| Email.php |
++-----------+
+
+* Issues & Bug :
+- no error reporting
+- can only send HTML with TEXT
+
+* Improvements :
+- Free form name for the To, Cc and Bcc headers
+- User defined headers
+- X-Priority: header
+- Quoted printable encoding of headers
+- Different charset ?
+- Embeded images
+

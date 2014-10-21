@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Form test</title>
+<link href="http://www.cassiopea.org/cassiopea.css" rel="stylesheet" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="author" content="Antoine Delvaux antoine(at)delvaux(dot)net">
+<meta name="keywords" content="formemail php class email attachement template harvesting Cassiopea GPL free software">
+<meta name="description" content="formemail.php is a PHP script and associated classes that sends out a preformated email from the values entered by an end user into a form.">
+</head>
+
+<body>
+
+<h2>formemail.php : test page</h2>
+
+<h3>Introduction</h3>
+
+<p>This a sample HTML form that shows the use of the <a href="formemail.phps">formemail script</a> and the related <a href="class.Email.phps">Email.php</a> and <a href="class.CodeEmail.phps">CodeEmail.php</a> classes.  Here are the templates used by the cgi script to send out a preformated email from this form : <a href="form.txt">plain text template</a>, <a href="form.html">HTML template</a> and <a href="form.tsv">tab-seperated-values template</a> (.tsv, useful for importing data into a database or a spreadsheet).
+
+<h3>FORM definition</h3>
+
+<p>To use this formemail cgi script, you should make a <code>&lt;FORM&gt;&nbsp;...&nbsp;&lt;/FORM&gt;</code> with a post action calling the script, something like :<BR><code>&lt;form name="form1" method="post" action="formemail.php"&gt;</code>.  Every field present in the form should have a name identifying it and the same name being used in the template files to be parsed.  If no template files are used, the script sends out a generic plain text email with all the fields and associated values replicated.
+
+<h3>Predifined and useful fields</h3>
+
+<p>Some predifined fields must or can be used in the HTML form for the formemail script to behaves correctly.  These fields can be of type <code>hidden</code> so they don't disturb the use of the form for the end user.  Here they are&nbsp;:
+<ul>
+  <li><code>to</code> (<em>mandatory</em>) : the address of the recipient
+  <li><code>subject</code> : the subject given to the email being sent
+  <li><code>from</code> : the address of the sender
+  <li><code>name</code> : the name of the sender
+  <li><code>firstname</code> : the firstname of the sender
+  <li><code>replyto</code> : if this field is set, a <tt>ReplyTo:</tt> email header with the sender address is set in the outgoing email
+  <li><code>template</code> : filename of the plain text email template file, relative or absolute path
+  <li><code>HTMLtemplate</code> : filename of the HTML email template file, relative or absolute path
+  <li><code>TABtemplate</code> : filename of the TSV (tab seperated values) email template file, relative or absolute path
+  <li><code>redirect</code> : web page to redirect to after the form has been filled
+  <li><code>DEBUG</code> : if this field is set a debugging page is printed with all values as the are passed to the cgi
+</ul>
+
+<h3>Security and email addresses harvesting</h3>
+
+<p>It should be impossible for a user creating a form using this cgi script to request a file out of the apache public directories to be sent out.
+<p>Email addresses harvesting can be prevented by coding email addresses present in the form.  A very simple scheme is used to code addresses, basicaly it's just reversing the addresss string and substituing the <code>@</code> with a <code>|</code> and every <code>.</code> with a <code>#</code>.  <a href="codeemail.php">This little form</a> gives you an easy way to encode your addresses before putting them into your form.  The <a href="class.CodeEmail.phps">CodeEmail.php</a> class is used for this encoding and decoding.
+<p>The use of these scripts on this server is carefully monitored to prevent abuses.
+
+<h3>License</h3>
+<p>This program and all related scripts are free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+<p>You should have received a copy of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a> along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+<p>v1.2 Copyright © 2000-2002 Antoine Delvaux, <a href="http://www.cassiopea.org">Cassiopea</a>.
+
+
+<hr>
+
+<h3>The form</h3>
+
+<form name="form1" method="post" action="formemail.php">
+<INPUT type="hidden" name="h1" value="Hidden value 1">
+<INPUT type="hidden" name="subject" value="Formemail test page : results">
+<INPUT type="hidden" name="to" value="gro#aepoissac|llun">
+<INPUT type="hidden" name="from" value="gro#aepoissac|llun">
+<INPUT type="hidden" name="name" value="Name">
+<INPUT type="hidden" name="firstname" value="Firstname">
+<!-- <INPUT type="hidden" name="replyto" value="yes"> !-->
+<INPUT type="hidden" name="template" value="form.txt">
+<INPUT type="hidden" name="TABtemplate" value="form.tab">
+<!-- <INPUT type="hidden" name="HTMLtemplate" value="../../../../var/log/syslog"> !-->
+<INPUT type="hidden" name="redirect" value="confirmation.html">
+<!-- <INPUT type="hidden" name="DEBUG" value="yes"> !-->
+<INPUT type="hidden" name="required" value="txt1,ckb1,sel3">
+
+<FIELDSET>
+<LEGEND>Texts</LEGEND>
+
+<TABLE>
+  <TR>
+    <TD>
+      Text : <B>txt1</B>
+    </TD>
+    <TD>
+      <input type="text" name="txt1" size="10">
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      Text with default value : <B>txt2</B>
+    </TD>
+    <TD>
+      <input type="text" name="txt2" size="10" value="default">
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      Text : <B>txt3</B>
+    </TD>
+    <TD>
+      <input type="password" name="txt3" size="10">
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      Text area : <B>txt4</B>
+    </TD>
+    <TD>
+      <textarea name="txt4" cols="50" rows="5"></textarea>
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      Text area with default value : <B>txt3</B>
+    </TD>
+    <TD>
+      <textarea name="txt3" cols="50" rows="5">
+Just a default text here\n
+
+Antoine.
+      </textarea>
+    </TD>
+  </TR>
+</TABLE>
+
+</FIELDSET>
+
+<FIELDSET>
+<LEGEND>Choices</LEGEND>
+
+<TABLE>
+  <TR>
+    <TD>
+      One checkbox : <B>ckb1</B>
+    </TD>
+    <TD>
+      <input type="checkbox" name="ckb1" value="I agree">I agree
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      Multiple checkboxes : <B>ckb2</B>
+    </TD>
+    <TD>
+      <input type="checkbox" name="ckb2a" value="www">WWW<BR>
+      <input type="checkbox" name="ckb2b" value="website" checked>Your website<BR>
+      <input type="checkbox" name="ckb2c" value="mail">e-mail<BR>
+      <input type="checkbox" name="ckb2d" value="news" checked>Usenet news<BR>
+      <input type="checkbox" name="ckb2e" value="chat">Chat<BR>
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+
+      Radio buttons : <B>radio1</B>
+    </TD>
+    <TD>
+      <input type="radio" name="radio1" value="I say yes !">Yes
+      <input type="radio" name="radio1" value="I say no !" checked>No
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      One popup menu : <B>sel1</B>
+    </TD>
+    <TD>
+      Your choice :
+      <select name="sel1">
+	<option value="1st">First choice</option>
+	<option value="2nd">Second choice</option>
+	<option value="3rd" selected>Third choice</option>
+	<option value="4th">Fourth choice</option>
+      </select>
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      One popup menu with two submenus : <B>sel2</B>
+    </TD>
+    <TD>
+      Your choice :
+      <select name="sel2">
+	<option value="1st">First choice</option>
+	  <OPTGROUP label="Second choice">
+	<option selected>2.1 choice</option>
+	<option>2.2 choice</option>
+	  </OPTGROUP>
+	<option value="3rd">Third choice</option>
+	<option value="4th">Fourth choice</option>
+      </select>
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+      Multiple selections : <B>sel2</B> and <B>sel3</B>
+    </TD>
+    <TD>
+      Choose some months and some years below&nbsp;:<BR>
+      <select name="sel3[]" multiple size="10">
+	<option>01</option>
+	<option>02</option>
+	<option>03</option>
+	<option>04</option>
+	<option selected>05</option>
+	<option>06</option>
+	<option>07</option>
+	<option>08</option>
+	<option>09</option>
+	<option selected>10</option>
+	<option>11</option>
+	<option>12</option>
+      </select>
+      <select name="sel4[]" multiple>
+	<option>1993</option>
+	<option>1994</option>
+	<option>1995</option>
+	<option>1996</option>
+	<option>1997</option>
+	<option>1998</option>
+	<option>1999</option>
+	<option>2000</option>
+	<option value="2001">2001</option>
+	<option value="2002">2002</option>
+      </select>
+    </TD>
+  </TR>
+</TABLE>
+
+</FIELDSET>
+
+<FIELDSET>
+<LEGEND>The End !</LEGEND>
+
+<TABLE>
+  <TR>
+    <TD>
+      <input type="submit" name="submit" value="Send"> &nbsp; or &nbsp;
+      <input type="reset" name="reset" value="Reset">
+    </TD>
+  </TR>
+</TABLE>
+
+</FIELDSET>
+
+</form>
+</body>
+</html>

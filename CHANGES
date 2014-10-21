@@ -1,0 +1,65 @@
+Change history of the formemail package
+---------------------------------------
+
+06/12/02	1.2.2
+	Antoine Delvaux <antoine(at)delvaux(dot)net>
+
+	* formemail.php
+	stripslashes the subject of emails
+
+--------
+10/11/02	1.2
+	Antoine Delvaux <antoine(at)delvaux(dot)net>
+
+	* formemail.php
+	easier use of redirect (not full url)
+	encoding of email addresses (CodeEmail.php v1.0)
+
+	* Email.php
+	removed empty line at beginning of text message
+
+	* CodeEmail.php
+	created
+
+--------
+04/09/02	1.1.1
+	Antoine Delvaux <antoine(at)belnet(dot)be>
+
+	* formemail.php
+	corrected path of template files
+	translation of default messages to english
+        load absolute or relative path files
+	debugging improved
+	added TABtemplate
+	added replyto header possibility
+	upgraded to Email.php v1.2
+
+	* Email.php
+	check email addresses against .biz, .info and .name TLD
+	sending the values in a tsv attachment
+	creates a ReplyTo header if asked
+	manage multiple select fields
+	updated loadTemplate
+
+--------
+00/11/15	1.1
+	Antoine Delvaux <antoine(at)delvaux(dot)net>
+
+	* Email.php
+	added constructor, formatBaseHeader, formatAlternativeHeader,
+	formatMixedHeader, formatAttachmentPart, formatAlternativeBody,
+	buildMessage methods.
+
+--------
+00/11/15	1.0
+	Antoine Delvaux <antoine(at)delvaux(dot)net>
+
+	* formemail.php
+	created to be used with Email.php v1.1
+
+--------
+99/10/21	1.0
+	Ron Chambers
+
+	* Email.php
+

@@ -64,7 +64,7 @@
 class Email 
 {
   //---Static
-  var $version		= "v1.3.3 by Antoine Delvaux, Cassiopea";	// version string
+  var $version		= "v1.3.4 by Antoine Delvaux, Cassiopea";	// version string
 
   //---Properties
   var $mailTo           = "";           // array of To addresses 

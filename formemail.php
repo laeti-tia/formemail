@@ -217,9 +217,11 @@ if (substr_count($to, "@") > 5) {
 }
 
 //--create email object
-if (!$mail = new Email($to, $subject, $from, $name, $replyto, $replytoname)) {
+try {
+  $mail = new Email($to, $subject, $from, $name, $replyto, $replytoname);
+} catch (Exception $e) {
   // Houston, we've got a problem...
-  $logMsg = date("y/m/d H:i:s")." Bad email address given from <".$_SERVER["HTTP_REFERER"].">.\n";
+  $logMsg = date("y/m/d H:i:s")." Bad email address given from <".$_SERVER["HTTP_REFERER"]."> : ".$e->getMessage()."\n";
   error_log($logMsg, 3, $log_file);
   PrintRobotPage("One of the email address ($to, $from, $replyto) you sent us wasn't good!  Please go back to correct it.");
   exit;
@@ -294,6 +296,7 @@ $message = "";
 if (!empty($_POST["DEBUG"])) {
   reset ($_POST);
   $message .= "<div align=left><p>Debugging mode turned on by user request.</p><p>Here are the variables received.</p><p>&nbsp;<br />\n";
+  $message .= "<p>Content of <code>\$_POST</code>:</p>\n";
   while (list($key, $val) = each($_POST)) {
     if (is_array($val)) {
       //--Multiple select input field
@@ -314,6 +317,7 @@ if (!empty($_POST["DEBUG"])) {
       $message .= "<br />\n";
     }
   }
+  $message .= "</p><p>Content of <code>\$_GET</code>:<br />".var_dump($_GET)."<br />\n";
   $message .= "</p><p>And some more debugging output&nbsp;:\n";
   $message .= "CONTENT_TYPE: ".$_SERVER["CONTENT_TYPE"]."<br />\n";
   $message .= "REQUEST_METHOD: ".$_SERVER["REQUEST_METHOD"]."<br />\n";

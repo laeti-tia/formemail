@@ -101,19 +101,17 @@ class Email
    ***************************************************************************/ 
   function Email($mailToAddress, $mailSubject, $mailFrom = "<>", $mailFromName = "", $mailReplyTo = "", $mailReplyToName = "") {
     if(!$this->setTo($mailToAddress)) {
-      return;
+      throw new Exception('No To address');
     }
     if(!$this->setSubject($mailSubject)) {
-      return;
+      throw new Exception('No subject');
     }
-    if($mailFrom) {
-      if(!$this->setFrom($mailFrom, $mailFromName)) {
-        return;
-      }
+    if(!$this->setFrom($mailFrom, $mailFromName)) {
+      throw new Exception('No From address');
     }
     if($mailReplyTo) {
       if(!$this->setReplyTo($mailReplyTo, $mailReplyToName)) {
-        return;
+        throw new Exception('No ReplyTo address');
       }
     }
   }
@@ -328,7 +326,7 @@ class Email
    * Returns:		true if valid
    ***************************************************************************/
   function checkEmail($inAddress){
-    return (ereg( "^[^@ ]+@([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+)\$",$inAddress));
+    return (ereg("^[^@ ]+@([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+)\$",$inAddress));
   }
   /***************************************************************************
    * buildVal($val, $inFormat, $doStripSlashes)

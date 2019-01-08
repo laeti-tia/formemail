@@ -1,7 +1,9 @@
 formemail
 =========
 
-formemail is the PHP script used by [Cassiopea asbl][cassiopea] for many years.  It runs on PHP 5 and is licensed under the GNU GPL-2.
+formemail was the PHP script used by [Cassiopea asbl][cassiopea] for many years.  It runs on PHP 5 and is licensed under the GNU GPL-2.
+
+It is now unmaintained, use at your own risks!
 
 Copyright
 ---------
